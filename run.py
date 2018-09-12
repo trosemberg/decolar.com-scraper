@@ -15,27 +15,32 @@ lizando o valor deste preço.
 """
 def find_html_cluster(passagem,browser):
 	print('in find_html_cluster')
-	browser.visit(passagem.get_url())
+	try:
+		browser.visit(passagem.get_url())
+	except selenium.common.exceptions.TimeoutException as e:
+		print('try later, probably not stable conection with internet')
 	flag = False
 	while flag == False:
 		try:
+			passagem.set_cluster(browser.find_by_css('.cluster-wrapper'))
 			for i in range(0,10):
-				passagem.set_cluster(browser.find_by_css('.cluster-wrapper'))
-				temp = passagem.cluster[i].find_by_css('.item-fare.fare-price')
-				temp = temp.find_by_css('.amount.price-amount').first.html
-				temp = passagem.cluster[i].find_by_css('.name').first.html
+				passagem.set_price(passagem.cluster[i].find_by_css('.item-fare.fare-price'))
+				passagem.set_comp(passagem.cluster[i].find_by_css('.name').first.html)
+				passagem.set_preco(passagem.price.find_by_css('.amount.price-amount').first.html)
+			print('done find_hml_cluster')
 			flag = True
 		except:
 			pass
 
 def find_preco_final(passagem,browser,pesquisa,df):
-	print('in find preco final\n')
+	print('in find preco final')
 	for i in range(0,10):
 		passagem.set_price(passagem.cluster[i].find_by_css('.item-fare.fare-price'))
 		passagem.set_comp(passagem.cluster[i].find_by_css('.name').first.html)
 		passagem.set_preco(passagem.price.find_by_css('.amount.price-amount').first.html)
 		df.loc[df.shape[0]] = [passagem.info['from'],passagem.info['to'],passagem.preco,pesquisa.week_day]\
 			+[pesquisa.day,pesquisa.part_of_day,passagem.info['from_d'],passagem.comp]
+	print('done find_preco_final\n')
 
 
 def read_links():
@@ -47,7 +52,7 @@ def read_links():
 			j = 0
 			for url in pesquisa:
 				j = j+1
-				print('{}º LINK de 50'.format(j))
+				print('\033[4m{}º LINK de 50\033[0m'.format(j))
 				pesquisa = Pesquisa()
 				pesquisa.set_week_day(strftime('%a'))
 				pesquisa.set_part_of_day(strftime('%H'))
