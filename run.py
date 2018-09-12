@@ -13,39 +13,29 @@ deste link se retira todo o HTML fonte da parte a qual possui a class "Preço Fi
 dentro deste vetor de 10 elementos onde tem "Preço Final", se itera este vetor loca-
 lizando o valor deste preço.
 """
-
-
-def find_html_preco_final(passagem,browser):
+def find_html_cluster(passagem,browser):
+	print('in find_html_cluster')
 	browser.visit(passagem.get_url())
-	tamanho = 0
-	while tamanho < 10:
+	flag = False
+	while flag == False:
 		try:
-			passagem.set_price(browser.find_by_css('.item-fare.fare-price'))
+			for i in range(0,10):
+				passagem.set_cluster(browser.find_by_css('.cluster-wrapper'))
+				temp = passagem.cluster[i].find_by_css('.item-fare.fare-price')
+				temp = temp.find_by_css('.amount.price-amount').first.html
+				temp = passagem.cluster[i].find_by_css('.name').first.html
+			flag = True
 		except:
 			pass
-		tamanho = len(passagem.price)
-	print("Foram encontradas {} Passagens de {from} para {to} de {from_d}" \
-		"".format(tamanho,**passagem.info))
-	print("Seus valores são de:")
-
 
 def find_preco_final(passagem,browser,pesquisa,df):
-	i = -1
-	while (i<9):
-		i=i+1
-		try:
-			preco = passagem.price[i].find_by_css('.amount.price-amount')
-			if (i==0):
-				print("\033[0;32m" + preco.first.html + "\033[0;0m", end = " ")
-			else:
-				print(preco.first.html, end = " ")
-			passagem.set_preco(preco.first.html)
-			df.loc[df.shape[0]] = [passagem.info['from'],passagem.info['to'],passagem.preco,pesquisa.week_day]\
-				+[pesquisa.day,pesquisa.part_of_day,passagem.info['from_d']]
-		except:
-			passagem.set_price(browser.find_by_css('.item-fare.fare-price'))
-			i= i-1
-	print("\n\n")
+	print('in find preco final\n')
+	for i in range(0,10):
+		passagem.set_price(passagem.cluster[i].find_by_css('.item-fare.fare-price'))
+		passagem.set_comp(passagem.cluster[i].find_by_css('.name').first.html)
+		passagem.set_preco(passagem.price.find_by_css('.amount.price-amount').first.html)
+		df.loc[df.shape[0]] = [passagem.info['from'],passagem.info['to'],passagem.preco,pesquisa.week_day]\
+			+[pesquisa.day,pesquisa.part_of_day,passagem.info['from_d'],passagem.comp]
 
 
 def read_links():
@@ -54,14 +44,17 @@ def read_links():
 		browser.driver.set_window_size(1000, 600)
 		with open("pages.csv","r") as pesquisa,open('Dados.csv',):
 			print("Pesquisa de preço realizada em: " + strftime('%c'))
+			j = 0
 			for url in pesquisa:
+				j = j+1
+				print('{}º LINK de 50'.format(j))
 				pesquisa = Pesquisa()
 				pesquisa.set_week_day(strftime('%a'))
 				pesquisa.set_part_of_day(strftime('%H'))
 				pesquisa.set_day(strftime('%x'))
 				passagem = Passagens()
 				passagem.set_url_and_info(url)
-				find_html_preco_final(passagem,browser)
+				find_html_cluster(passagem,browser)
 				find_preco_final(passagem,browser,pesquisa,df)
 	df.to_csv('Dados.csv', index= False)
 

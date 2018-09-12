@@ -1,10 +1,11 @@
 class Passagens:
 	def __init__(self):
-		self.price = []
+		self.price = ''
 		self.url = ''
 		self.info = {}
 		self.cluster = []
 		self.preco = ''
+		self.comp = ''
 
 	def set_preco(self,preco):
 		self.preco = preco
@@ -25,6 +26,14 @@ class Passagens:
 
 	def set_price(self,price):
 		self.price = price
+
+	def set_cluster(self,cluster):
+		self.cluster = cluster
+
+	def set_comp(self,comp):
+		self.comp = comp
+
+
 
 class Pesquisa:
 	def __init__(self):
