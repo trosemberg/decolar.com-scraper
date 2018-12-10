@@ -1,0 +1,7 @@
+numpy
+pandas
+jupyter
+seaborn
+matplotlib
+splinter
+selenium
